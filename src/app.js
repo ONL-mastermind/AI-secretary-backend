@@ -15,12 +15,28 @@ import userRoutes from './routes/user.routes.js';
 
 const app = express();
 
-// --- 미들웨어 설정 ---
+// --- 🔥 수정된 CORS 설정 ---
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: [
+    'http://localhost:3000',                          // React 개발 서버
+    'http://localhost:5173',                          // Vite 개발 서버
+    'https://ai-secretary-36b03.web.app',            // Firebase Hosting
+    'https://ai-secretary-36b03.firebaseapp.com',    // Firebase 백업 도메인
+    process.env.CORS_ORIGIN                           // 환경변수로 추가 도메인 허용
+  ].filter(Boolean), // undefined 값 제거
   credentials: true, // 쿠키를 포함한 요청을 허용합니다.
   optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ]
 };
+
+// --- 미들웨어 설정 ---
 app.use(helmet()); // HTTP 헤더 보안 설정
 app.use(cors(corsOptions));
 app.use(express.json());
