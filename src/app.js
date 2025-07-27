@@ -9,9 +9,9 @@ import helmet from 'helmet'; // 보안 강화를 위해 helmet 추가
 
 // --- 라우터 임포트 ---
 import authRoutes from './routes/auth.routes.js';
-// 🔥 다른 라우터들도 임시 주석처리 (DB 의존성 때문에)
+import dashboardRoutes from './routes/dashboard.routes.js'; // 🔥 주석 해제
+// 🔥 다른 라우터들은 여전히 주석처리 (DB 의존성 때문에)
 // import adminRoutes from './routes/admin.routes.js';
-// import dashboardRoutes from './routes/dashboard.routes.js';
 // import postRoutes from './routes/post.routes.js';
 // import userRoutes from './routes/user.routes.js';
 
@@ -84,16 +84,17 @@ app.get('/api/test', (req, res) => {
       'GET /api/test',
       'POST /api/auth/register-test (DB 없이)',
       'POST /api/auth/login-test (DB 없이)',
-      'GET /api/auth/verify-test (DB 없이)'
+      'GET /api/auth/verify-test (DB 없이)',
+      'GET /api/dashboard/data (DB 없이)' // 🔥 추가
     ]
   });
 });
 
 // --- API 라우트 연결 ---
 app.use('/api/auth', authRoutes);
-// 🔥 다른 라우터들은 임시 주석처리
+app.use('/api/dashboard', dashboardRoutes); // 🔥 주석 해제
+// 🔥 다른 라우터들은 여전히 주석처리
 // app.use('/api/admin', adminRoutes);
-// app.use('/api/dashboard', dashboardRoutes);
 // app.use('/api/posts', postRoutes);
 // app.use('/api/user', userRoutes);
 
@@ -110,7 +111,9 @@ app.use((req, res, next) => {
       'GET /health',
       'GET /api/test',
       'POST /api/auth/register-test',
-      'POST /api/auth/login-test'
+      'POST /api/auth/login-test',
+      'GET /api/auth/verify-test',
+      'GET /api/dashboard/data' // 🔥 추가
     ]
   });
 });
@@ -145,6 +148,7 @@ const server = app.listen(PORT, () => {
   console.log(`✅ AI비서관 백엔드 서버가 ${PORT}번 포트에서 실행 중입니다.`);
   console.log(`🌐 서버 URL: http://localhost:${PORT}`);
   console.log(`🧪 테스트 URL: http://localhost:${PORT}/test`);
+  console.log(`📊 대시보드 API: http://localhost:${PORT}/api/dashboard/data`);
   console.log(`⚠️  DB 연결 비활성화 (임시)`);
 }).on('error', (err) => {
   console.error('🚨 서버 시작 실패:', err);
