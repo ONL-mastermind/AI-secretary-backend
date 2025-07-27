@@ -43,6 +43,30 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
+// --- 🔥 디버깅용 테스트 라우터 ---
+app.get('/test', (req, res) => {
+  res.json({ 
+    message: '✅ 백엔드 서버 정상 작동!',
+    timestamp: new Date().toISOString(),
+    port: process.env.PORT || 8000,
+    nodeEnv: process.env.NODE_ENV || 'development'
+  });
+});
+
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    message: '✅ API 라우터 정상!',
+    routes: [
+      'GET /api/auth/verify',
+      'POST /api/auth/login', 
+      'POST /api/auth/register',
+      'POST /api/auth/register-test (DB 없이)',
+      'POST /api/auth/login-test (DB 없이)',
+      'GET /api/auth/verify-test (DB 없이)'
+    ]
+  });
+});
+
 // --- API 라우트 연결 ---
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
@@ -52,12 +76,16 @@ app.use('/api/user', userRoutes);
 
 // --- 404 핸들러 ---
 app.use((req, res, next) => {
-  res.status(404).json({ message: '요청하신 API 경로를 찾을 수 없습니다.' });
+  res.status(404).json({ 
+    message: '요청하신 API 경로를 찾을 수 없습니다.',
+    path: req.path,
+    method: req.method
+  });
 });
 
 // --- 중앙 에러 핸들러 ---
 app.use((err, req, res, next) => {
-  console.error(err); // 디버깅을 위해 전체 에러 객체를 로깅합니다.
+  console.error('🚨 서버 에러:', err); // 디버깅을 위해 전체 에러 객체를 로깅합니다.
   
   const statusCode = err.statusCode || 500;
   const isProduction = process.env.NODE_ENV === 'production';
@@ -67,11 +95,17 @@ app.use((err, req, res, next) => {
     ? '서버 내부 오류가 발생했습니다.'
     : err.message;
 
-  res.status(statusCode).json({ message });
+  res.status(statusCode).json({ 
+    success: false,
+    message,
+    ...(isProduction ? {} : { stack: err.stack }) // 개발 환경에서만 스택 트레이스 포함
+  });
 });
 
 // --- 서버 실행 ---
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`✅ 서버가 ${PORT}번 포트에서 실행 중입니다.`);
+  console.log(`🌐 서버 URL: http://localhost:${PORT}`);
+  console.log(`🧪 테스트 URL: http://localhost:${PORT}/test`);
 });
